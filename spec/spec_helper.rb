@@ -16,16 +16,17 @@ def get_connection_hash
     {
       adapter:      "postgresql",
       database:     "fuzzily_test",
-      host:         "localhost",
+      host:         "127.0.0.1",
       min_messages: "warning",
-      username:     ENV["FUZZILY_DB_USER"]
+      username:     "postgres",
+      password:     "postgres",
     }
   when "mysql"
     {
       adapter:  "mysql2",
       database: "fuzzily_test",
-      host:     "localhost",
-      username: ENV["FUZZILY_DB_USER"]
+      host:     "127.0.0.1",
+      username: "root"
     }
   when "sqlite3"
     {
