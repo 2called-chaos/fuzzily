@@ -1,7 +1,8 @@
-# Fuzzily - fuzzy string matching for ActiveRecord
+# Fuzzily (reloaded) - fuzzy string matching for ActiveRecord
 
 [![Gem Version](https://badge.fury.io/rb/fuzzily_reloaded.png)](https://badge.fury.io/rb/fuzzily_reloaded)
-[![Build Status](https://travis-ci.org/2called-chaos/fuzzily.png?branch=master)](https://travis-ci.org/2called-chaos/fuzzily)
+[![tests](https://github.com/2called-chaos/fuzzily/actions/workflows/spec.yml/badge.svg)](https://github.com/2called-chaos/fuzzily/actions/workflows/spec.yml)
+[![maintainability](https://api.codeclimate.com/v1/badges/c6e9298f222a52072431/maintainability)](https://codeclimate.com/github/2called-chaos/fuzzily/maintainability)
 
 > Show me photos of **Marakech** !
 >
@@ -204,7 +205,7 @@ end
 
 MIT licence. Quite permissive if you ask me.
 
-Copyright (c) 2013, HouseTrip Ltd.
+Copyright (c) 2013, HouseTrip Ltd.  
 Copyright (c) 2020, Sven Pachnit aka. 2called-chaos (forked)
 
 ## Contributing
@@ -216,6 +217,6 @@ Copyright (c) 2020, Sven Pachnit aka. 2called-chaos (forked)
 5. Create a new Pull Request
 
 
-Thanks to @mezis for creating this literal gem.
+Thanks to @mezis for creating this literal gem.  
 Thanks to @bclennox, @fdegiuli, @nickbender, @Shanison, @rickbutton for pointing out
 and/or helping on various issues.
