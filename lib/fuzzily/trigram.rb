@@ -1,5 +1,5 @@
-require "active_support/core_ext/string/multibyte"
 require "delegate"
+
 module Fuzzily
   class String < SimpleDelegator
 
@@ -16,13 +16,12 @@ module Fuzzily
 
     protected
 
-    # Remove accents, downcase, replace spaces and word start with "*",
-    # return list of normalized words
+    # Remove accents, downcase, replace spaces and word start with "*", return list of normalized words
     def normalize
-      ActiveSupport::Multibyte::Chars.new(self.to_s)
-        .mb_chars.unicode_normalize(:nfkd).to_s.downcase
-        .gsub(/[^\x00-\x7F]/, "")
+      I18n.transliterate(to_s)
+        .downcase
         .gsub(/[^a-z\d]/, " ")
+        .strip
         .gsub(/\s+/, "*")
         .gsub(/^/, "**")
         .gsub(/$/, "*")

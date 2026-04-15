@@ -13,6 +13,14 @@ describe Fuzzily::String do
     expect(result("Montélimar")).to eq %w(**m *mo mon ont nte tel eli lim ima mar ar*)
   end
 
+  it "normalizes special characters (ß)" do
+    expect(result("Straße")).to eq %w(**s *st str tra ras ass sse se*)
+  end
+
+  it "normalizes special characters (ø)" do
+    expect(result("Smørrebrød")).to eq %w(**s *sm smo mor orr rre reb ebr bro rod od*)
+  end
+
   it "allows numbers" do
     expect(result("GTA 5")).to eq %w(**g *gt gta ta* a*5 *5*)
   end
