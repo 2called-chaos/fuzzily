@@ -1,3 +1,5 @@
+require "logger"
+require "i18n"
 require "fuzzily/version"
 require "fuzzily/searchable"
 require "fuzzily/migration"
