@@ -20,8 +20,6 @@ jobs:
     env:
       FUZZILY_ADAPTER: ${{ matrix.db }}
       BUNDLE_GEMFILE: ${{ matrix.gemfile }}
-      # Fix for ruby-head
-      LD_LIBRARY_PATH: ${{ matrix.ruby == 'ruby-head' && '/root/.rubies/ruby-head/lib' || '' }}
 
     strategy:
       matrix:
@@ -91,7 +89,7 @@ jobs:
           --health-retries 5
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
 
       - name: Fix Ruby-Head Home Path
         if: matrix.ruby == 'ruby-head'
@@ -99,7 +97,7 @@ jobs:
           # Create the home directory the pre-compiled binary expects
           sudo mkdir -p /home/runner
           # Link the expected .rubies path to the actual one
-          sudo ln -sf /root/.rubies /home/runner/.rubies
+          sudo ln -sf "$HOME/.rubies" /home/runner/.rubies
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
