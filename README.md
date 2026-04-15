@@ -2,7 +2,6 @@
 
 [![Gem Version](https://badge.fury.io/rb/fuzzily_reloaded.png)](https://badge.fury.io/rb/fuzzily_reloaded)
 [![tests](https://github.com/2called-chaos/fuzzily/actions/workflows/spec.yml/badge.svg)](https://github.com/2called-chaos/fuzzily/actions/workflows/spec.yml)
-[![maintainability](https://api.codeclimate.com/v1/badges/c6e9298f222a52072431/maintainability)](https://codeclimate.com/github/2called-chaos/fuzzily/maintainability)
 
 > Show me photos of **Marakech** !
 >
@@ -13,7 +12,7 @@ Fuzzily finds misspelled, prefix, or partial needles in a haystack of
 strings. It's a fast, [trigram](http://en.wikipedia.org/wiki/N-gram)-based, database-backed [fuzzy](http://en.wikipedia.org/wiki/Approximate_string_matching) string search/match engine for Rails.
 Loosely inspired from an [old blog post](http://unirec.blogspot.co.uk/2007/12/live-fuzzy-search-using-n-grams-in.html).
 
-Tested with ActiveRecord (5.1, 6.0) on various Rubies (2.3, 2.4, 2.5, 2.6, 2.7) and the most common adapters (SQLite3, MySQL, and PostgreSQL).
+Tested with ActiveRecord (6.1, 7.x and 8.x) on various Rubies (3.[0-3]) and the most common adapters (SQLite3, MySQL, and PostgreSQL).
 
 If your dateset is big, if you need yet more speed, or do not use ActiveRecord,
 check out [blurrily](http://github.com/mezis/blurrily), another gem (backed with a C extension)
@@ -21,19 +20,7 @@ with the same intent.
 
 ## Fork differences
 
-- Added support for Rails 5.1, 6, and 7
-- Removed support for Rails <5.1
-
-### Breaking changes
-
-- Dirty attributes behaviour has changed in after_save context.
-  Use `saved_change_to_ATTR?` instead of `ATTR_changed?`!
-- Semi-breaking: The string is now being checked for `blank?` instead of `nil?` to prevent `***` ngrams
-
-### Fixes
-
-- Numbers are now supported but using a Converter is recommended
-- Fixed deprecation warning regarding uniqueness validator
+Please refer to CHANGELOG.md for changes since the fork.
 
 
 ## Installation
