@@ -20,6 +20,7 @@ tmp
 # Data
 *.gz
 *.bz2
+*.sqlite3-*
 
 # Bundler
 .bundle

@@ -2,9 +2,9 @@ name: tests
 
 on:
   push:
-    branches: [ "master" ]
+    branches: ["master"]
   pull_request:
-    branches: [ "master" ]
+    branches: ["master"]
 
 permissions:
   contents: read
@@ -12,74 +12,111 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    continue-on-error: ${{ matrix.ruby == 'head' }}
+    container: 'catthehacker/ubuntu:act-latest'
+    continue-on-error: ${{ matrix.ruby == 'ruby-head' }}
+
+    name: "Ruby ${{ matrix.ruby }} with ${{ matrix.gemfile }} on ${{ matrix.db }}"
+
     env:
       FUZZILY_ADAPTER: ${{ matrix.db }}
       BUNDLE_GEMFILE: ${{ matrix.gemfile }}
+      # Fix for ruby-head
+      LD_LIBRARY_PATH: ${{ matrix.ruby == 'ruby-head' && '/root/.rubies/ruby-head/lib' || '' }}
 
     strategy:
       matrix:
         ruby:
-          - "ruby-head"
+          - ruby-head
+          - "3.3"
+          - "3.2"
           - "3.1"
           - "3.0"
-          - "2.7"
-          - "2.6"
-          - "2.5"
         gemfile:
-          - gemfiles/rails51.gemfile
-          - gemfiles/rails60.gemfile
+          - gemfiles/rails61.gemfile
           - gemfiles/rails70.gemfile
+          - gemfiles/rails71.gemfile
+          - gemfiles/rails72.gemfile
+          - gemfiles/rails80.gemfile
+          - gemfiles/rails81.gemfile
         db:
-          - mysql
           - postgresql
+          - mysql
           - sqlite3
+
         exclude:
-          - ruby: "2.5"
-            gemfile: gemfiles/rails70.gemfile
-          - ruby: "2.6"
-            gemfile: gemfiles/rails70.gemfile
+          # --- Ruby 3.0 ---
           - ruby: "3.0"
-            gemfile: gemfiles/rails51.gemfile
+            gemfile: gemfiles/rails72.gemfile
+          - ruby: "3.0"
+            gemfile: gemfiles/rails80.gemfile
+          - ruby: "3.0"
+            gemfile: gemfiles/rails81.gemfile
+
+          # --- Ruby 3.1 ---
           - ruby: "3.1"
-            gemfile: gemfiles/rails51.gemfile
+            gemfile: gemfiles/rails80.gemfile
+          - ruby: "3.1"
+            gemfile: gemfiles/rails81.gemfile
+
+          # --- Ruby-Head ---
           - ruby: "ruby-head"
-            gemfile: gemfiles/rails51.gemfile
+            gemfile: gemfiles/rails61.gemfile
 
     services:
       postgres:
         image: postgres:10
         env:
           POSTGRES_USER: postgres
-          POSTGRES_DB: fuzzily_test
           POSTGRES_PASSWORD: postgres
-        ports: ['5432:5432']
+          POSTGRES_DB: fuzzily_test
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+
       mysql:
         image: mysql:8
         env:
-          MYSQL_ALLOW_EMPTY_PASSWORD: true
-        ports: ['3306:3306']
+          MYSQL_DATABASE: fuzzily_test
+          MYSQL_USER: test
+          MYSQL_PASSWORD: test
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_CHARSET: utf8mb4
+          MYSQL_COLLATION: utf8mb4_unicode_ci
         options: >-
-          --health-cmd "mysqladmin ping"
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Set up Ruby
-      uses: ruby/setup-ruby@v1
-      with:
-        ruby-version: ${{ matrix.ruby }}
-        bundler-cache: true # runs 'bundle install' and caches installed gems automatically
-    - name: Create MySQL test database with utf8mb4 charset
-      if: ${{ matrix.db == 'mysql' }}
-      run: |
-        mysql -uroot --host=127.0.0.1 -e "CREATE DATABASE fuzzily_test CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci"
-    - name: Run tests
-      run: bundle exec rake
+      - uses: actions/checkout@v3
+
+      - name: Fix Ruby-Head Home Path
+        if: matrix.ruby == 'ruby-head'
+        run: |
+          # Create the home directory the pre-compiled binary expects
+          sudo mkdir -p /home/runner
+          # Link the expected .rubies path to the actual one
+          sudo ln -sf /root/.rubies /home/runner/.rubies
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+          # Only update for stable rubies; head already has the newest
+          rubygems: ${{ matrix.ruby == 'ruby-head' && '' || 'latest' }}
+
+      - name: Fix Ruby-Head Shared Library Path
+        if: matrix.ruby == 'ruby-head'
+        run: |
+          # Find where the head binary is and add its lib folder to LD_LIBRARY_PATH
+          RUBY_LIB_PATH=$(dirname $(which ruby))/../lib
+          echo "LD_LIBRARY_PATH=$RUBY_LIB_PATH:$LD_LIBRARY_PATH" >> $GITHUB_ENV
+
+      - name: Run tests
+        env:
+          DATABASE_URL: ${{ matrix.db == 'mysql' && 'mysql2://test:test@mysql:3306/fuzzily_test' || matrix.db == 'postgresql' && 'postgresql://postgres:postgres@postgres:5432/fuzzily_test' || 'sqlite://notempty' }}
+        run: bundle exec rake

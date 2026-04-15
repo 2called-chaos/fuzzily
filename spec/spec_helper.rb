@@ -2,8 +2,7 @@ require "fuzzily"
 require "pathname"
 require "yaml"
 
-
-DATABASE = Pathname.new "test.sqlite3"
+DATABASE = Pathname.new "./test.sqlite3"
 
 # def get_adapter
 #   ENV.fetch("FUZZILY_ADAPTER", "sqlite3")
@@ -13,25 +12,32 @@ DATABASE = Pathname.new "test.sqlite3"
 def get_connection_hash
   case ENV.fetch("FUZZILY_ADAPTER", "sqlite3")
   when "postgresql"
+    # Because old AR is too dumb to use URL properly
+    uri = URI.parse(ENV.fetch("DATABASE_URL", "postgresql://postgres:postgres@127.0.0.1/fuzzily_test"))
     {
-      adapter:      "postgresql",
-      database:     "fuzzily_test",
-      host:         "127.0.0.1",
+      adapter: "postgresql",
+      host:     uri.host,
+      port:     uri.port,
+      username: uri.user,
+      password: uri.password,
+      database: uri.path.sub(%r{^/}, ''),
       min_messages: "warning",
-      username:     "postgres",
-      password:     "postgres",
     }
   when "mysql"
+    # Because old AR is too dumb to use URL properly
+    uri = URI.parse(ENV.fetch("DATABASE_URL", "mysql2://test:test@127.0.0.1/fuzzily_test"))
     {
-      adapter:  "mysql2",
-      database: "fuzzily_test",
-      host:     "127.0.0.1",
-      username: "root"
+      adapter:  uri.scheme,
+      host:     uri.host,
+      port:     uri.port,
+      username: uri.user,
+      password: uri.password,
+      database: uri.path.sub(%r{^/}, ''),
     }
   when "sqlite3"
     {
-      adapter:  "sqlite3",
-      database: DATABASE.to_s
+      adapter: "sqlite3",
+      database: DATABASE,
     }
   end
 end
